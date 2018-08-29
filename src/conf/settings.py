@@ -128,6 +128,10 @@ REST_FRAMEWORK = {
     ]
 }
 
+YOUTUBE_API_URL = 'https://www.googleapis.com/youtube/v3/search'
+YOUTUBE_API_VIDEOS_COUNT = 10
+YOUTUBE_API_KEY = None
+
 
 try:
     from conf.settings_local import *

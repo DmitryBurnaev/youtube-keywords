@@ -7,3 +7,5 @@ markdown==2.6.11
 
 # Celery
 django-celery==3.2.2
+
+requests==2.19.1

@@ -15,9 +15,9 @@ class TimestampedModel(models.Model):
 
 
 class Keyword(TimestampedModel):
-    """ Store keywords, linked with django standard users """
+    """ Stores keywords, linked with django standard users """
 
-    name = models.CharField(_('Name'), max_length=256)
+    name = models.CharField(_('Name'), max_length=256, unique=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                              verbose_name=_('User'),
                              on_delete=models.CASCADE)
@@ -29,3 +29,22 @@ class Keyword(TimestampedModel):
         verbose_name = _('Keyword')
         verbose_name_plural = _('Keywords')
 
+
+class VideoItem(TimestampedModel):
+    """ Stores given links to youtube videos """
+
+    youtube_id = models.CharField(_('Youtube ID'), primary_key=True,
+                                  max_length=32, unique=True)
+    title = models.CharField(_('Title'), max_length=256)
+    description = models.TextField(_('Description'))
+    thumbnail_url = models.CharField(_('Thumbnail Link'), max_length=256)
+    published_at = models.DateTimeField(_('Published At'))
+    keywords = models.ManyToManyField(Keyword, related_name='videos')
+
+    def __str__(self):
+        return self.title[:50]
+
+    class Meta:
+        ordering = ('created_at',)
+        verbose_name = _('Video Item')
+        verbose_name_plural = _('Video Items')
