@@ -44,6 +44,9 @@ class VideoItem(TimestampedModel):
     def __str__(self):
         return self.title[:50]
 
+    def get_link(self):
+        return settings.YOUTUBE_LINK_TEMPLATE.format(id=self.youtube_id)
+
     class Meta:
         ordering = ('created_at',)
         verbose_name = _('Video Item')

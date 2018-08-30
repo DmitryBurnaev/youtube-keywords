@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'django_filters',
 
     'modules.keywords'
 ]
@@ -112,7 +113,7 @@ TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
-USE_L10N = True
+USE_L10N = False
 
 USE_TZ = True
 
@@ -124,14 +125,20 @@ STATIC_URL = '/static/'
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated'
-    ]
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 10
 }
 
 YOUTUBE_API_URL = 'https://www.googleapis.com/youtube/v3/search'
 YOUTUBE_API_VIDEOS_COUNT = 10
 YOUTUBE_API_KEY = None
+YOUTUBE_LINK_TEMPLATE = 'https://www.youtube.com/watch?v={id}'
 
+DATE_INPUT_FORMATS = [
+    '%d.%m.%Y'
+]
 
 try:
     from conf.settings_local import *

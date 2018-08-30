@@ -1,5 +1,3 @@
-import os
-
 import requests
 import logging
 import django
@@ -13,16 +11,23 @@ from keywords.models import Keyword, VideoItem
 log = logging.getLogger(__name__)
 
 
+def get_last_videos(keyword, raise_error=True):
+    """
 
-def get_last_videos(keyword):
+    :param keyword:
+    :param raise_error:
+    :return:
+    :rtype: dict
+    """
     #     'Postman-Token': 'ccaf9fd2-82db-4648-bff3-bb952efa08d2'
-
+    log.info(f'Searching videos for [{keyword}]')
     headers = {
         'Cache-Control': 'no-cache',
     }
     request_body = {
         'type': 'video',
         'part': 'snippet',
+        'order': 'date',
         'q': keyword,
         'maxResults': settings.YOUTUBE_API_VIDEOS_COUNT,
         'key': settings.YOUTUBE_API_KEY
@@ -33,9 +38,13 @@ def get_last_videos(keyword):
                             headers=headers, params=request_body)
 
     if not response.status_code == 200:
-        raise LookupError(
-            f'An HTTP error{response.status_code} occurred: {response.content}'
-        )
+        msg = (f'An HTTP error{response.status_code} '
+               f'occurred: {response.content}')
+        log.error(msg)
+        if raise_error:
+            raise LookupError(msg)
+        else:
+            return {}
 
     data = response.json()
     data = {
@@ -53,49 +62,45 @@ def get_last_videos(keyword):
 
 @transaction.atomic
 def search_and_update_items():
-    keywords = Keyword.objects.all()
+    keywords = {keyword.name: keyword for keyword in Keyword.objects.all()}
+    data_set = {}
+    log.info('Start searching for {} keywords'.format(len(keywords)))
+
     for keyword in keywords:
-        log.info(f'Searching videos for [{keyword.name}]...')
-        given_items = get_last_videos(keyword)
-        exists_items = VideoItem.objects.all()
+        last_videos = get_last_videos(keyword, raise_error=False)
+        for video_id, video_item in last_videos.items():
+            data_set.setdefault(video_id, video_item)
+            data_set[video_id].setdefault('keywords', [])
+            data_set[video_id]['keywords'].append(keyword)
 
-        exists_ids = set(exists_items.values_list('youtube_id', flat=True))
-        given_ids = set(given_items.keys())
+    exists_items = VideoItem.objects.all()
+    given_ids = set(data_set.keys())
+    exists_ids = set(exists_items.values_list('youtube_id', flat=True))
 
-        # Add new items
-        new_youtube_ids = given_ids - exists_ids
-        if new_youtube_ids:
-            logging.info(
-                'Found {} records to insert'.format(len(new_youtube_ids))
-            )
-            new_video_items = []
-            for youtube_id in new_youtube_ids:
-                # video_item = VideoItem(**given_items[youtube_id])
-                # video_item.keywords.add(keyword)
-                # new_video_items.append(video_item)
-                new_video_items.append(VideoItem(**given_items[youtube_id]))
+    # Add new items
+    new_youtube_ids = given_ids - exists_ids
+    if new_youtube_ids:
+        logging.info(
+            'Found {} records to insert'.format(len(new_youtube_ids))
+        )
+        new_video_items = []
+        for youtube_id in new_youtube_ids:
+            given_item = data_set[youtube_id]
+            new_video_items.append(VideoItem(
+                youtube_id=given_item['youtube_id'],
+                title=given_item['title'],
+                description=given_item['description'],
+                thumbnail_url=given_item['thumbnail_url'],
+                published_at=given_item['published_at'],
+            ))
 
-            new_videos = VideoItem.objects.bulk_create(new_video_items)
-            for video_item in new_videos:
-                video_item.keywords.add(keyword)
+        new_videos = VideoItem.objects.bulk_create(new_video_items)
+        for video_item in new_videos:
+            keyword_names = data_set[video_item.youtube_id]['keywords']
+            keyword_items = [keywords[k_name] for k_name in keyword_names]
+            video_item.keywords.add(*keyword_items)
 
-        # Update items
-        update_youtube_ids = exists_ids & given_ids
-        if update_youtube_ids:
-            logging.info(
-                'Found {} records to update'.format(len(update_youtube_ids))
-            )
-            items_to_update = VideoItem.objects.filter(
-                youtube_id__in=update_youtube_ids
-            )
-            for video_item in items_to_update:
-                given_item = given_items[video_item.youtube_id]
-                video_item['title'] = given_item['title']
-                video_item['description'] = given_item['description']
-                video_item.keywords.add(keyword)
-                video_item.save()
-
-        log.info(f'Searching for [{keyword.name}] was finished')
+    log.info('Searching for {} keywords was finished'.format(len(keywords)))
 
 
 if __name__ == '__main__':
