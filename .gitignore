@@ -1,6 +1,7 @@
 *.py[code]
 
 *.sqlite3
+*.db
 .idea/
 venv/
 settings_local.py

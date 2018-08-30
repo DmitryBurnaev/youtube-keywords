@@ -1,11 +1,10 @@
 import requests
 import logging
-import django
-django.setup()
 
 from django.conf import settings
 from django.db import transaction
 
+from app_celery import app
 from keywords.models import Keyword, VideoItem
 
 log = logging.getLogger(__name__)
@@ -19,7 +18,7 @@ def get_last_videos(keyword, raise_error=True):
     :return:
     :rtype: dict
     """
-    #     'Postman-Token': 'ccaf9fd2-82db-4648-bff3-bb952efa08d2'
+
     log.info(f'Searching videos for [{keyword}]')
     headers = {
         'Cache-Control': 'no-cache',
@@ -60,6 +59,7 @@ def get_last_videos(keyword, raise_error=True):
     return data
 
 
+@app.task(name='search_and_update_items')
 @transaction.atomic
 def search_and_update_items():
     keywords = {keyword.name: keyword for keyword in Keyword.objects.all()}
@@ -104,5 +104,4 @@ def search_and_update_items():
 
 
 if __name__ == '__main__':
-    # os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'conf.settings')
     search_and_update_items()

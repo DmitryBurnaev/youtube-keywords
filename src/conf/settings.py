@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
+from datetime import timedelta
+
+from kombu import Queue
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -139,6 +142,63 @@ YOUTUBE_LINK_TEMPLATE = 'https://www.youtube.com/watch?v={id}'
 DATE_INPUT_FORMATS = [
     '%d.%m.%Y'
 ]
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'standard': {
+            'format': "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] "
+                      "%(message)s",
+            'datefmt': "%d%b %H:%M:%S"
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
+    'handlers': {
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler'
+        },
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'standard',
+        },
+    },
+    'loggers': {
+        'modules': {
+            'handlers': ['mail_admins', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        }
+    },
+}
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
+
+CELERY_RESULT_BACKEND = 'cache'
+CELERY_TASK_RESULT_EXPIRES = 10*60  # storing task result only for 10 min
+CELERY_CACHE_BACKEND = 'memory'
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/1'
+
+CELERY_TASK_DEFAULT_QUEUE = 'default'
+CELERY_TASK_DEFAULT_ROUTING_KEY = 'default'
+CELERY_QUEUES = (
+    Queue('default', routing_key='default'),
+)
+CELERYBEAT_SCHEDULE = {
+    'search_youtube_videos': {
+        'task': 'search_and_update_items',
+        'schedule': 10*60  # run every 10 min
+    }
+}
+
 
 try:
     from conf.settings_local import *

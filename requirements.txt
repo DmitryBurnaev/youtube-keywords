@@ -3,9 +3,8 @@ Django==2.1
 # DRF
 djangorestframework==3.8.2
 django-filter==2.0.0
-markdown==2.6.11
+# markdown==2.6.11
 
-# Celery
-django-celery==3.2.2
-
+celery==4.2.1
+redis==2.10.6
 requests==2.19.1
