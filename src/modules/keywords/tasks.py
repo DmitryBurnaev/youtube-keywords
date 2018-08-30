@@ -21,7 +21,7 @@ def get_last_videos(keyword, raise_error=True):
     :rtype: dict
     """
 
-    log.info(f'Searching videos for [{keyword}]')
+    log.info('Searching videos for [{}]'.format(keyword))
     headers = {
         'Cache-Control': 'no-cache',
     }
@@ -40,8 +40,8 @@ def get_last_videos(keyword, raise_error=True):
     )
 
     if not response.status_code == 200:
-        msg = (f'An HTTP error{response.status_code} '
-               f'occurred: {response.content}')
+        msg = ('An HTTP error{response.status_code}'
+               'occurred: {response.content}'.format(response=response))
         log.error(msg)
         if raise_error:
             raise LookupError(msg)

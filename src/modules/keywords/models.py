@@ -26,7 +26,7 @@ class Keyword(TimestampedModel):
                              on_delete=models.CASCADE)
 
     def __str__(self):
-        return f'{self.name} [{self.user}]'
+        return '{self.name} [{self.user}]'.format(self=self)
 
     class Meta:
         verbose_name = _('Keyword')

@@ -2,7 +2,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, generics
 from rest_framework.generics import get_object_or_404
 
-from filters import VideoItemFilter
+from keywords.filters import VideoItemFilter
 from keywords.models import Keyword
 from keywords.serializers import KeywordSerializer, VideoItemSerializer
 
