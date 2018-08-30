@@ -8,6 +8,8 @@ from keywords.serializers import KeywordSerializer, VideoItemSerializer
 
 
 class KeywordViewSet(viewsets.ModelViewSet):
+    """ API for retrieve, update, remove keywords for requested user """
+
     serializer_class = KeywordSerializer
 
     def get_queryset(self):
@@ -18,6 +20,12 @@ class KeywordViewSet(viewsets.ModelViewSet):
 
 
 class VideoItemListView(generics.ListAPIView):
+    """
+    API for retrieving list of videos by requested keyword-id.
+    It can be filtered by date
+    and paginated by settings.REST_FRAMEWORK['PAGE_SIZE'] value
+    """
+
     serializer_class = VideoItemSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = VideoItemFilter

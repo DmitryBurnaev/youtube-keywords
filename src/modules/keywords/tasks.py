@@ -12,6 +12,8 @@ log = logging.getLogger(__name__)
 
 def get_last_videos(keyword, raise_error=True):
     """
+    This method helps to get videos for target keyword. Got videos will be
+    ordered by published date and limited by settings.YOUTUBE_API_VIDEOS_COUNT,
 
     :param keyword:
     :param raise_error:
@@ -33,8 +35,9 @@ def get_last_videos(keyword, raise_error=True):
     }
 
     # check response code and coverage this to try block
-    response = requests.get(settings.YOUTUBE_API_URL,
-                            headers=headers, params=request_body)
+    response = requests.get(
+        settings.YOUTUBE_API_URL, headers=headers, params=request_body
+    )
 
     if not response.status_code == 200:
         msg = (f'An HTTP error{response.status_code} '
@@ -62,6 +65,18 @@ def get_last_videos(keyword, raise_error=True):
 @app.task(name='search_and_update_items')
 @transaction.atomic
 def search_and_update_items():
+    """
+    Celery task for getting new videos from youtube (by stored keywords)
+    Required data: YOUTUBE_API_KEY (can be obtain from official
+    googleapi web resource)
+
+    """
+
+    if not settings.YOUTUBE_API_KEY:
+        log.error('Task will not be executed! You should define '
+                  'YOUTUBE_API_KEY in your ENV')
+        return
+
     keywords = {keyword.name: keyword for keyword in Keyword.objects.all()}
     data_set = {}
     log.info('Start searching for {} keywords'.format(len(keywords)))
@@ -101,7 +116,3 @@ def search_and_update_items():
             video_item.keywords.add(*keyword_items)
 
     log.info('Searching for {} keywords was finished'.format(len(keywords)))
-
-
-if __name__ == '__main__':
-    search_and_update_items()

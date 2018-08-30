@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken',
     'django_filters',
 
     'modules.keywords'
@@ -125,8 +126,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ),
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
@@ -134,15 +140,9 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10
 }
 
-YOUTUBE_API_URL = 'https://www.googleapis.com/youtube/v3/search'
-YOUTUBE_API_VIDEOS_COUNT = 10
-YOUTUBE_API_KEY = None
-YOUTUBE_LINK_TEMPLATE = 'https://www.youtube.com/watch?v={id}'
-
 DATE_INPUT_FORMATS = [
     '%d.%m.%Y'
 ]
-
 
 LOGGING = {
     'version': 1,
@@ -175,6 +175,7 @@ LOGGING = {
         }
     },
 }
+
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
@@ -185,7 +186,7 @@ CACHES = {
 CELERY_RESULT_BACKEND = 'cache'
 CELERY_TASK_RESULT_EXPIRES = 10*60  # storing task result only for 10 min
 CELERY_CACHE_BACKEND = 'memory'
-CELERY_BROKER_URL = 'redis://127.0.0.1:6379/1'
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/1')
 
 CELERY_TASK_DEFAULT_QUEUE = 'default'
 CELERY_TASK_DEFAULT_ROUTING_KEY = 'default'
@@ -198,6 +199,11 @@ CELERYBEAT_SCHEDULE = {
         'schedule': 10*60  # run every 10 min
     }
 }
+
+YOUTUBE_API_URL = 'https://www.googleapis.com/youtube/v3/search'
+YOUTUBE_API_VIDEOS_COUNT = 10
+YOUTUBE_API_KEY = os.getenv('YOUTUBE_API_KEY')
+YOUTUBE_LINK_TEMPLATE = 'https://www.youtube.com/watch?v={id}'
 
 
 try:
