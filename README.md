@@ -22,7 +22,7 @@ cd <path_to_project>
 source venv/bin/activate
 
 cd src
-export PYTHONPATH=$(pwd)
+export PYTHONPATH=$(pwd)/modules
 export YOUTUBE_API_KEY=<your-api-key-from-googleapi>
 
 # migrate db
