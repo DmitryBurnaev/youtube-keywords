@@ -36,6 +36,8 @@ class Keyword(TimestampedModel):
 class VideoItem(TimestampedModel):
     """ Stores given links to youtube videos """
 
+    LINK_TEMPLATE = settings.YOUTUBE_LINK_TEMPLATE
+
     youtube_id = models.CharField(_('Youtube ID'), primary_key=True,
                                   max_length=32, unique=True)
     title = models.CharField(_('Title'), max_length=256)
@@ -48,7 +50,7 @@ class VideoItem(TimestampedModel):
         return self.title[:50]
 
     def get_link(self):
-        return settings.YOUTUBE_LINK_TEMPLATE.format(id=self.youtube_id)
+        return self.LINK_TEMPLATE.format(id=self.youtube_id)
 
     class Meta:
         ordering = ('created_at',)

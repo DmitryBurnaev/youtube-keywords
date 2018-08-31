@@ -22,8 +22,13 @@ cd <path_to_project>
 source venv/bin/activate
 
 cd src
-export PYTHONPATH=$(pwd)/modules
+export PYTHONPATH=$(pwd):${PYTHONPATH}
+export PYTHONPATH=$(pwd)/conf:${PYTHONPATH}
+export PYTHONPATH=$(pwd)/modules:${PYTHONPATH}
 export YOUTUBE_API_KEY=<your-api-key-from-googleapi>
+
+# optional
+export CELERY_BROKER_URL=redis://docker.redis:6379/1
 
 # migrate db
 python manage.py migrate
@@ -40,4 +45,5 @@ python manage.py runserver
 
 You can click on this link: https://developers.google.com/youtube/v3/getting-started
 and get needed manual for creation API key.
+
 

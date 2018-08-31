@@ -1,3 +1,4 @@
+.python-version
 *.py[code]
 
 *.sqlite3

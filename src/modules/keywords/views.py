@@ -1,9 +1,8 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, generics
-from rest_framework.generics import get_object_or_404
 
 from keywords.filters import VideoItemFilter
-from keywords.models import Keyword
+from keywords.models import Keyword, VideoItem
 from keywords.serializers import KeywordSerializer, VideoItemSerializer
 
 
@@ -31,5 +30,4 @@ class VideoItemListView(generics.ListAPIView):
     filterset_class = VideoItemFilter
 
     def get_queryset(self):
-        keyword = get_object_or_404(Keyword, id=self.kwargs['keyword_id'])
-        return keyword.videos.all()
+        return VideoItem.objects.filter(keywords__id=self.kwargs['keyword_id'])

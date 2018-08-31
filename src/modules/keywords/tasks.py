@@ -77,16 +77,18 @@ def search_and_update_items():
                   'YOUTUBE_API_KEY in your ENV')
         return
 
-    keywords = {keyword.name: keyword for keyword in Keyword.objects.all()}
+    keywords = dict(Keyword.objects.all().values_list('id', 'name'))
     data_set = {}
     log.info('Start searching for {} keywords'.format(len(keywords)))
 
-    for keyword in keywords:
-        last_videos = get_last_videos(keyword, raise_error=False)
+    # We have to group keywords for given video items.
+    # It will help to perform situation with more then 1 keyword for the video
+    for keyword_id, keyword_name in keywords.items():
+        last_videos = get_last_videos(keyword_name, raise_error=False)
         for video_id, video_item in last_videos.items():
             data_set.setdefault(video_id, video_item)
             data_set[video_id].setdefault('keywords', [])
-            data_set[video_id]['keywords'].append(keyword)
+            data_set[video_id]['keywords'].append(keyword_id)
 
     exists_items = VideoItem.objects.all()
     given_ids = set(data_set.keys())
@@ -111,8 +113,7 @@ def search_and_update_items():
 
         new_videos = VideoItem.objects.bulk_create(new_video_items)
         for video_item in new_videos:
-            keyword_names = data_set[video_item.youtube_id]['keywords']
-            keyword_items = [keywords[k_name] for k_name in keyword_names]
-            video_item.keywords.add(*keyword_items)
+            keyword_ids = data_set[video_item.youtube_id]['keywords']
+            video_item.keywords.add(*keyword_ids)
 
     log.info('Searching for {} keywords was finished'.format(len(keywords)))
