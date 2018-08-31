@@ -4,7 +4,7 @@ import logging
 from django.conf import settings
 from django.db import transaction
 
-from app_celery import app
+from celery_app import app
 from keywords.models import Keyword, VideoItem
 
 log = logging.getLogger(__name__)

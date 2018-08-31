@@ -4,6 +4,7 @@
 *.sqlite3
 *.db
 .idea/
+.env
 venv/
 settings_local.py
-
+celerybeat-schedule

@@ -18,14 +18,12 @@ nano conf/settings_local.py  #  change something if it is needed
 
 ### How to setup and run? ###
 ```bash
-cd <path_to_project>
+cd <PATH_TO_PROJECT>
 source venv/bin/activate
 
 cd src
 export PYTHONPATH=$(pwd):${PYTHONPATH}
-export PYTHONPATH=$(pwd)/conf:${PYTHONPATH}
-export PYTHONPATH=$(pwd)/modules:${PYTHONPATH}
-export YOUTUBE_API_KEY=<your-api-key-from-googleapi>
+export YOUTUBE_API_KEY=<YOUR_API_KEY>
 
 # optional
 export CELERY_BROKER_URL=redis://docker.redis:6379/1
@@ -47,3 +45,16 @@ You can click on this link: https://developers.google.com/youtube/v3/getting-sta
 and get needed manual for creation API key.
 
 
+
+### Simple way: run and install via Docker-compose
+
+```bash
+
+cd <PATH_TO_PROJECT>
+echo "YOUTUBE_API_KEY=<YOUR_API_KEY>" > .env
+docker-compose build
+docker-compose up -d
+
+# create superuser
+docker-compose exec web python manage.py createsuperuser
+```

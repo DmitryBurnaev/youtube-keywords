@@ -6,7 +6,7 @@ from django.conf import settings
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'conf.settings')
 
-app = Celery('youtube-keywords')
+app = Celery('youtube_keywords')
 app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 app.conf.beat_schedule = settings.CELERYBEAT_SCHEDULE

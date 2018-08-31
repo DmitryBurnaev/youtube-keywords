@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
+import sys
 from datetime import timedelta
 
 from kombu import Queue
@@ -32,6 +33,7 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
+sys.path.append(os.path.join(BASE_DIR, 'modules'))
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -84,7 +86,7 @@ WSGI_APPLICATION = 'conf.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(PROJECT_ROOT_DIR, 'db.sqlite3'),
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
 
@@ -196,7 +198,7 @@ CELERY_QUEUES = (
 CELERYBEAT_SCHEDULE = {
     'search_youtube_videos': {
         'task': 'search_and_update_items',
-        'schedule': 10*60  # run every 10 min
+        'schedule': 10*1  # run every 10 min
     }
 }
 
